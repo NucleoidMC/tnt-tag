@@ -1,5 +1,5 @@
 {
-  "type": "tntrun:tntrun",
+  "type": "tnttag:tnttag",
   "map": {
     "spawn_block": {
       "Name": "minecraft:red_terracotta",
