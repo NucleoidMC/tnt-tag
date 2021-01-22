@@ -2,6 +2,7 @@ package io.github.CoderInABarrel.tntrun.game;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class TeamManager {
@@ -72,4 +73,9 @@ public class TeamManager {
         return alive;
     }
 
+    public static UUID selectTagger() {
+        Random rand = new Random();
+        UUID firstTagger = TeamManager.getLiving().get(rand.nextInt(TeamManager.getLiving().size()));
+        return firstTagger;
+    }
 }

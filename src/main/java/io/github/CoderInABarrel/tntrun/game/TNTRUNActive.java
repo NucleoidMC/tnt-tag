@@ -66,6 +66,13 @@ public class TNTRUNActive {
             Set<PlayerRef> participants = gameSpace.getPlayers().stream()
                     .map(PlayerRef::of)
                     .collect(Collectors.toSet());
+
+            for (PlayerRef ref: participants) {
+                System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
+                TeamManager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
+                TeamManager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
+            }
+            System.out.println(TeamManager.getLiving().size());
             GlobalWidgets widgets = new GlobalWidgets(game);
             TNTRUNActive active = new TNTRUNActive(gameSpace, map, widgets, config, participants);
 
@@ -91,16 +98,20 @@ public class TNTRUNActive {
             game.on(PlayerDamageListener.EVENT, active::onPlayerDamage);
             game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
         });
+        UUID firstTagger = TeamManager.selectTagger();
+        TeamManager.removeRunner(firstTagger);
+        TeamManager.addTagger(firstTagger);
+        PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
+        taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED),false);
+        taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
     }
 
     private void onOpen() {
         ServerWorld world = this.gameSpace.getWorld();
         for (PlayerRef ref : this.participants.keySet()) {
             ref.ifOnline(world, this::spawnParticipant);
-            TeamManager.addRunner(ref.getEntity(world).getUuid());
-            TeamManager.addLiving(ref.getEntity(world).getUuid());
+
         }
-        selectTaggers();
         this.stageManager.onOpen(world.getTime(), this.config);
         // TODO setup logic
     }
@@ -117,15 +128,6 @@ public class TNTRUNActive {
 
     private void removePlayer(ServerPlayerEntity player) {
         this.participants.remove(PlayerRef.of(player));
-    }
-    private void selectTaggers() {
-        Random rand = new Random();
-        UUID firstTagger = TeamManager.getRunners().get(rand.nextInt(TeamManager.getRunners().size()));
-        PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
-        TeamManager.removeRunner(firstTagger);
-        TeamManager.addTagger(firstTagger);
-        taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
-        taggerEntity.sendMessage(new LiteralText("You are a tagger").formatted(Formatting.RED), false);
     }
 
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
@@ -174,7 +176,6 @@ public class TNTRUNActive {
         }
 
         if (time == nextTime && TeamManager.getLiving().size() > 1) {
-            System.out.println("New round");
             for (UUID player : TeamManager.getTaggers()) {
                 ServerPlayerEntity tagger = gameSpace.getServer().getPlayerManager().getPlayer(player);
                 for (PlayerRef ref : this.participants.keySet()) {
@@ -184,7 +185,7 @@ public class TNTRUNActive {
                 }
                 world.createExplosion(null, tagger.getPos().getX(), tagger.getPos().getY(), tagger.getPos().getZ(), 0.0f, Explosion.DestructionType.NONE);
                 tagger.sendMessage(new LiteralText("You lost").formatted(Formatting.YELLOW), false);
-                this.spawnLogic.resetPlayer(tagger, GameMode.SPECTATOR);
+                this.spawnSpectator(tagger);
                 TeamManager.removeTagger(tagger.getUuid());
                 TeamManager.removeLiving(tagger.getUuid());
                 if (TeamManager.getLiving().size() <= 1) {
@@ -193,7 +194,9 @@ public class TNTRUNActive {
                         this.gameSpace.close(GameCloseReason.FINISHED);
                     }
                 }else {
-                    selectTaggers();
+                    UUID firstTagger = TeamManager.selectTagger();
+                    TeamManager.removeRunner(firstTagger);
+                    TeamManager.addTagger(firstTagger);
                 }
             }
             nextTime = time + (20 * 60);
