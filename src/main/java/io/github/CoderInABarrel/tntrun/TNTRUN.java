@@ -10,11 +10,11 @@ import io.github.CoderInABarrel.tntrun.game.TNTRUNWaiting;
 
 public class TNTRUN implements ModInitializer {
 
-    public static final String ID = "tntrun";
+    public static final String ID = "tnttag";
     public static final Logger LOGGER = LogManager.getLogger(ID);
 
     public static final GameType<TNTRUNConfig> TYPE = GameType.register(
-            new Identifier(ID, "tntrun"),
+            new Identifier(ID, "tnttag"),
             TNTRUNWaiting::open,
             TNTRUNConfig.CODEC
     );
