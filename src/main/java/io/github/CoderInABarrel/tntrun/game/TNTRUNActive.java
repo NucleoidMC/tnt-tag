@@ -128,6 +128,9 @@ public class TNTRUNActive {
 
     private void removePlayer(ServerPlayerEntity player) {
         this.participants.remove(PlayerRef.of(player));
+        TeamManager.removeRunner(player.getUuid());
+        TeamManager.removeTagger(player.getUuid());
+        TeamManager.removeLiving(player.getUuid());
     }
 
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {

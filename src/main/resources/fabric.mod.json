@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "tntrun",
   "version": "${version}",
-  "name": "tnt-run",
-  "description": "tnt run",
+  "name": "tnt-tag",
+  "description": "tnt tag",
   "authors": [
     "I ran out of name ideas"
   ],
