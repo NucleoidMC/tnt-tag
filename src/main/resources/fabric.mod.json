@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "tntrun",
+  "id": "tnttag",
   "version": "${version}",
   "name": "tnt-tag",
   "description": "tnt tag",
