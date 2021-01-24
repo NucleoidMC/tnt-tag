@@ -109,7 +109,7 @@ public class TNTRUNActive {
         PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
         taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
-        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3));
+        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
     }
 
     private void onOpen() {
@@ -153,7 +153,7 @@ public class TNTRUNActive {
                 player.inventory.armor.set(3, Items.TNT.getDefaultStack());
                 attacker.inventory.armor.set(3, Items.AIR.getDefaultStack());
                 attacker.removeStatusEffect(StatusEffects.SPEED);
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3));
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
             }
         } else {
             player.heal(amount);
@@ -213,7 +213,7 @@ public class TNTRUNActive {
                     TeamManager.addTagger(firstTagger);
                     ServerPlayerEntity taggerEnt = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
                     taggerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
-                    taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3));
+                    taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
                 }
             }
             nextTime = time + (20 * 30);
