@@ -157,7 +157,8 @@ public class TNTRUNActive {
                 attacker.inventory.armor.set(3, Items.AIR.getDefaultStack());
                 attacker.removeStatusEffect(StatusEffects.SPEED);
                 attacker.inventory.clear();
-                player.inventory.insertStack(Items.TNT.getDefaultStack());
+                attacker.setStackInHand(player.getActiveHand(),Items.AIR.getDefaultStack());
+                player.setStackInHand(player.getActiveHand(),Items.TNT.getDefaultStack());
                 attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,2, true, false, true));
             }
