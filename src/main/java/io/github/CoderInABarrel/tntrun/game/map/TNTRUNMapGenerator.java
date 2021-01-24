@@ -28,8 +28,8 @@ public class TNTRUNMapGenerator {
     }
 
     private void buildSpawn(MapTemplate builder) {
-        BlockPos min = new BlockPos(-10, 64, -10);
-        BlockPos max = new BlockPos(10, 64, 10);
+        BlockPos min = new BlockPos(-50, 64, -50);
+        BlockPos max = new BlockPos(50, 64, 50);
 
         for (BlockPos pos : BlockPos.iterate(min, max)) {
             builder.setBlockState(pos, this.config.spawnBlock);
