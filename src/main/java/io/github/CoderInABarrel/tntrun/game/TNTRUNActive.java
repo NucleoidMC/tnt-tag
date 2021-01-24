@@ -3,6 +3,8 @@ package io.github.CoderInABarrel.tntrun.game;
 import io.github.CoderInABarrel.tntrun.game.map.TNTRUNMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -144,6 +146,7 @@ public class TNTRUNActive {
 
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
         // TODO handle damage
+        source.getAttacker().getType().equals(EntityType.WHA)
         if (source.getAttacker() instanceof PlayerEntity) {
             PlayerEntity attacker = (PlayerEntity) source.getAttacker();
             player.heal(amount);
