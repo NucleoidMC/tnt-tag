@@ -109,7 +109,6 @@ public class TNTRUNActive {
         PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
         taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
-        taggerEntity.applyStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,100,3, true, false, true));
         taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,100,3, true, false, true));
     }
 
