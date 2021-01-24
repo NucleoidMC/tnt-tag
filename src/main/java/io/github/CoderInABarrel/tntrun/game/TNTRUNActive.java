@@ -76,7 +76,7 @@ public class TNTRUNActive {
                 System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
-                ref.getEntity(gameSpace.getServer()).addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
+                ref.getEntity(gameSpace.getServer()).addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
             }
             System.out.println(TeamManager.getLiving().size());
             GlobalWidgets widgets = new GlobalWidgets(game);
@@ -111,7 +111,7 @@ public class TNTRUNActive {
         taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
         taggerEntity.inventory.insertStack(Items.TNT.getDefaultStack());
-        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,2, true, false, true));
+        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
 
     }
 
@@ -159,8 +159,8 @@ public class TNTRUNActive {
                 attacker.inventory.clear();
                 attacker.setStackInHand(player.getActiveHand(),Items.AIR.getDefaultStack());
                 player.setStackInHand(player.getActiveHand(),Items.TNT.getDefaultStack());
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,2, true, false, true));
+                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
             }
         } else {
             player.heal(amount);
@@ -220,7 +220,7 @@ public class TNTRUNActive {
                     TeamManager.addTagger(firstTagger);
                     ServerPlayerEntity taggerEnt = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
                     taggerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
-                    taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,2, true, false, true));
+                    taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
                     taggerEnt.inventory.insertStack(Items.TNT.getDefaultStack());
                 }
             }
