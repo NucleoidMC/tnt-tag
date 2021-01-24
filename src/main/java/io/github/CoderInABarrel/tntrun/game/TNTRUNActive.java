@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -26,7 +25,6 @@ import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.util.PlayerRef;
 import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -67,7 +65,7 @@ public class TNTRUNActive {
                     .map(PlayerRef::of)
                     .collect(Collectors.toSet());
 
-            for (PlayerRef ref: participants) {
+            for (PlayerRef ref : participants) {
                 System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
@@ -102,7 +100,7 @@ public class TNTRUNActive {
         TeamManager.removeRunner(firstTagger);
         TeamManager.addTagger(firstTagger);
         PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
-        taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED),false);
+        taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
     }
 
@@ -173,8 +171,11 @@ public class TNTRUNActive {
         ServerWorld world = this.gameSpace.getWorld();
         long time = world.getTime();
 
-        for (UUID player: TeamManager.getLiving()) {
-            gameSpace.getServer().getPlayerManager().getPlayer(player).setExperienceLevel(((int) (nextTime - time) / 20));
+        for (UUID player : TeamManager.getLiving()) {
+            ServerPlayerEntity playerEnt = gameSpace.getServer().getPlayerManager().getPlayer(player);
+            if (playerEnt != null) {
+                playerEnt.setExperienceLevel(((int) (nextTime - time) / 20));
+            }
 
         }
 
@@ -196,16 +197,19 @@ public class TNTRUNActive {
                         this.broadcastWin(WinResult.win(this.gameSpace.getServer().getPlayerManager().getPlayer(user)));
                         this.gameSpace.close(GameCloseReason.FINISHED);
                     }
-                }else {
+                } else {
                     UUID firstTagger = TeamManager.selectTagger();
                     TeamManager.removeRunner(firstTagger);
                     TeamManager.addTagger(firstTagger);
+                    ServerPlayerEntity taggerEnt = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
+                    taggerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
                 }
             }
             nextTime = time + (20 * 60);
         } else if (TeamManager.getLiving().size() <= 1) {
             for (UUID user : TeamManager.getLiving()) {
                 this.broadcastWin(WinResult.win(this.gameSpace.getServer().getPlayerManager().getPlayer(user)));
+                this.gameSpace.close(GameCloseReason.FINISHED);
             }
         }
 
