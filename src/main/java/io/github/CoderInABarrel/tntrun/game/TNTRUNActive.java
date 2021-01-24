@@ -3,12 +3,19 @@ package io.github.CoderInABarrel.tntrun.game;
 import io.github.CoderInABarrel.tntrun.game.map.TNTRUNMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stat;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -102,6 +109,7 @@ public class TNTRUNActive {
         PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
         taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
+        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3));
     }
 
     private void onOpen() {
@@ -144,6 +152,8 @@ public class TNTRUNActive {
                 player.sendMessage(new LiteralText("You are now tagger").formatted(Formatting.RED), false);
                 player.inventory.armor.set(3, Items.TNT.getDefaultStack());
                 attacker.inventory.armor.set(3, Items.AIR.getDefaultStack());
+                attacker.removeStatusEffect(StatusEffects.SPEED);
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3));
             }
         } else {
             player.heal(amount);
@@ -203,9 +213,10 @@ public class TNTRUNActive {
                     TeamManager.addTagger(firstTagger);
                     ServerPlayerEntity taggerEnt = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
                     taggerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
+                    taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3));
                 }
             }
-            nextTime = time + (20 * 60);
+            nextTime = time + (20 * 30);
         } else if (TeamManager.getLiving().size() <= 1) {
             for (UUID user : TeamManager.getLiving()) {
                 this.broadcastWin(WinResult.win(this.gameSpace.getServer().getPlayerManager().getPlayer(user)));
