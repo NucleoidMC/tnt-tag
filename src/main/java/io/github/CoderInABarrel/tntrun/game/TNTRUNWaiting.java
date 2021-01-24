@@ -1,5 +1,7 @@
 package io.github.CoderInABarrel.tntrun.game;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.minecraft.util.ActionResult;
 import xyz.nucleoid.plasmid.game.*;
 import xyz.nucleoid.plasmid.game.event.*;
@@ -15,7 +17,6 @@ public class TNTRUNWaiting {
     private final TNTRUNMap map;
     private final TNTRUNConfig config;
     private final TNTRUNSpawnLogic spawnLogic;
-
     private TNTRUNWaiting(GameSpace gameSpace, TNTRUNMap map, TNTRUNConfig config) {
         this.gameSpace = gameSpace;
         this.map = map;
@@ -50,6 +51,7 @@ public class TNTRUNWaiting {
 
     private void addPlayer(ServerPlayerEntity player) {
         this.spawnPlayer(player);
+
     }
 
     private ActionResult onPlayerDeath(ServerPlayerEntity player, DamageSource source) {

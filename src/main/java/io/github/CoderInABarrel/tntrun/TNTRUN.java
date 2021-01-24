@@ -1,5 +1,6 @@
 package io.github.CoderInABarrel.tntrun;
 
+
 import net.fabricmc.api.ModInitializer;
 import xyz.nucleoid.plasmid.game.GameType;
 import net.minecraft.util.Identifier;
@@ -20,5 +21,6 @@ public class TNTRUN implements ModInitializer {
     );
 
     @Override
-    public void onInitialize() {}
+    public void onInitialize() {
+    }
 }

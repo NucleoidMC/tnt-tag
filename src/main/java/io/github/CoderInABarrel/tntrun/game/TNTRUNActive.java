@@ -76,7 +76,7 @@ public class TNTRUNActive {
                 System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
-                ref.getEntity(gameSpace.getServer()) .addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
+                ref.getEntity(gameSpace.getServer()).addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
             }
             System.out.println(TeamManager.getLiving().size());
             GlobalWidgets widgets = new GlobalWidgets(game);
@@ -110,6 +110,7 @@ public class TNTRUNActive {
         PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
         taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
+        taggerEntity.inventory.insertStack(Items.TNT.getDefaultStack());
         taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
 
     }
@@ -155,6 +156,8 @@ public class TNTRUNActive {
                 player.inventory.armor.set(3, Items.TNT.getDefaultStack());
                 attacker.inventory.armor.set(3, Items.AIR.getDefaultStack());
                 attacker.removeStatusEffect(StatusEffects.SPEED);
+                attacker.inventory.clear();
+                player.inventory.insertStack(Items.TNT.getDefaultStack());
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
             }
         } else {
@@ -216,6 +219,7 @@ public class TNTRUNActive {
                     ServerPlayerEntity taggerEnt = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
                     taggerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
                     taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
+                    taggerEnt.inventory.insertStack(Items.TNT.getDefaultStack());
                 }
             }
             nextTime = time + (20 * 30);
