@@ -76,6 +76,7 @@ public class TNTRUNActive {
                 System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
                 TeamManager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
+                ref.getEntity(gameSpace.getServer()) .addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
             }
             System.out.println(TeamManager.getLiving().size());
             GlobalWidgets widgets = new GlobalWidgets(game);
@@ -110,6 +111,7 @@ public class TNTRUNActive {
         taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
         taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
         taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,3, true, false, true));
+
     }
 
     private void onOpen() {
