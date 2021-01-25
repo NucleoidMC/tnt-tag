@@ -146,7 +146,6 @@ public class TNTRUNActive {
 
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
         // TODO handle damage
-        source.getAttacker().getType().equals(EntityType.WHA)
         if (source.getAttacker() instanceof PlayerEntity) {
             PlayerEntity attacker = (PlayerEntity) source.getAttacker();
             player.heal(amount);
