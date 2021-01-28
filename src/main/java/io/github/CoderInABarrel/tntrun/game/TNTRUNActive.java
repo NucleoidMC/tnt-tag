@@ -144,25 +144,34 @@ public class TNTRUNActive {
         TeamManager.removeLiving(player.getUuid());
     }
 
+    private void setTagger(UUID player) {
+        ServerPlayerEntity playerEnt = gameSpace.getServer().getPlayerManager().getPlayer(player);
+        playerEnt.sendMessage(new LiteralText("You are now tagger").formatted(Formatting.RED), false);
+        playerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
+        playerEnt.setStackInHand(playerEnt.getActiveHand(),Items.TNT.getDefaultStack());
+        playerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
+        TeamManager.removeRunner(player);
+        TeamManager.addTagger(player);
+    }
+
+    private void setRunner(UUID player) {
+        ServerPlayerEntity playerEnt = gameSpace.getServer().getPlayerManager().getPlayer(player);
+        playerEnt.inventory.armor.set(3, Items.AIR.getDefaultStack());
+        playerEnt.removeStatusEffect(StatusEffects.SPEED);
+        playerEnt.inventory.clear();
+        playerEnt.setStackInHand(playerEnt.getActiveHand(),Items.AIR.getDefaultStack());
+        playerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
+        TeamManager.removeTagger(player);
+        TeamManager.addRunner(player);
+    }
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
         // TODO handle damage
         if (source.getAttacker() instanceof PlayerEntity) {
             PlayerEntity attacker = (PlayerEntity) source.getAttacker();
             player.heal(amount);
             if (TeamManager.isTagger(attacker.getUuid()) && TeamManager.isRunner(player.getUuid())) {
-                TeamManager.removeRunner(player.getUuid());
-                TeamManager.removeTagger(attacker.getUuid());
-                TeamManager.addRunner(attacker.getUuid());
-                TeamManager.addTagger(player.getUuid());
-                player.sendMessage(new LiteralText("You are now tagger").formatted(Formatting.RED), false);
-                player.inventory.armor.set(3, Items.TNT.getDefaultStack());
-                attacker.inventory.armor.set(3, Items.AIR.getDefaultStack());
-                attacker.removeStatusEffect(StatusEffects.SPEED);
-                attacker.inventory.clear();
-                attacker.setStackInHand(player.getActiveHand(),Items.AIR.getDefaultStack());
-                player.setStackInHand(player.getActiveHand(),Items.TNT.getDefaultStack());
-                attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
+                setTagger(player.getUuid());
+                setRunner(attacker.getUuid());
             }
         } else {
             player.heal(amount);
