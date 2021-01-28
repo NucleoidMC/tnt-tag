@@ -173,7 +173,7 @@ public class TNTRUNActive {
                 setTagger(player.getUuid());
                 setRunner(attacker.getUuid());
             }
-        } else {
+        } else if (!(source.isOutOfWorld())) {
             player.heal(amount);
         }
         return ActionResult.SUCCESS;
@@ -204,7 +204,6 @@ public class TNTRUNActive {
             if (playerEnt != null) {
                 playerEnt.setExperienceLevel(((int) (nextTime - time) / 20));
             }
-
         }
 
         if (time == nextTime && TeamManager.getLiving().size() > 1) {
@@ -227,12 +226,7 @@ public class TNTRUNActive {
                     }
                 } else {
                     UUID firstTagger = TeamManager.selectTagger();
-                    TeamManager.removeRunner(firstTagger);
-                    TeamManager.addTagger(firstTagger);
-                    ServerPlayerEntity taggerEnt = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
-                    taggerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
-                    taggerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
-                    taggerEnt.inventory.insertStack(Items.TNT.getDefaultStack());
+                    setTagger(firstTagger);
                 }
             }
             nextTime = time + (20 * 30);
