@@ -14,6 +14,7 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -138,7 +139,7 @@ public class TNTRUNActive {
     }
 
     private void removePlayer(ServerPlayerEntity player) {
-        this.participants.remove(PlayerRef.of(player));
+        spawnSpectator(player);
         TeamManager.removeRunner(player.getUuid());
         TeamManager.removeTagger(player.getUuid());
         TeamManager.removeLiving(player.getUuid());
@@ -164,6 +165,7 @@ public class TNTRUNActive {
         TeamManager.removeTagger(player);
         TeamManager.addRunner(player);
     }
+
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
         // TODO handle damage
         if (source.getAttacker() instanceof PlayerEntity) {
@@ -175,6 +177,8 @@ public class TNTRUNActive {
             }
         } else if (!(source.isOutOfWorld())) {
             player.heal(amount);
+        } else if (source.isOutOfWorld()) {
+            removePlayer(player);
         }
         return ActionResult.SUCCESS;
     }
@@ -216,9 +220,7 @@ public class TNTRUNActive {
                 }
                 world.createExplosion(null, tagger.getPos().getX(), tagger.getPos().getY(), tagger.getPos().getZ(), 0.0f, Explosion.DestructionType.NONE);
                 tagger.sendMessage(new LiteralText("You lost").formatted(Formatting.YELLOW), false);
-                this.spawnSpectator(tagger);
-                TeamManager.removeTagger(tagger.getUuid());
-                TeamManager.removeLiving(tagger.getUuid());
+                removePlayer(tagger);
                 if (TeamManager.getLiving().size() <= 1) {
                     for (UUID user : TeamManager.getLiving()) {
                         this.broadcastWin(WinResult.win(this.gameSpace.getServer().getPlayerManager().getPlayer(user)));
