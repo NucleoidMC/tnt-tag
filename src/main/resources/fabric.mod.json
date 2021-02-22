@@ -11,7 +11,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.CoderInABarrel.tntrun.TNTRUN"
+      "io.github.CoderInABarrel.tntrun.TNTTAG"
     ]
   },
   "depends": {
