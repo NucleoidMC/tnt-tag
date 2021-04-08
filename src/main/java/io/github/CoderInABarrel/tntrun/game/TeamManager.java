@@ -10,14 +10,14 @@ public class TeamManager {
     private static List<UUID> tagger = new LinkedList<>();
     private static List<UUID> runners = new LinkedList<>();
 
-    public static boolean isTagger(UUID player) {
+    public boolean isTagger(UUID player) {
         if (tagger.contains(player)) {
             return true;
         }
         return false;
     }
 
-    public static boolean isRunner(UUID player) {
+    public boolean isRunner(UUID player) {
         if (runners.contains(player)) {
             return true;
         }
@@ -25,33 +25,33 @@ public class TeamManager {
     }
 
 
-    public static void addRunner(UUID player) {
+    public void addRunner(UUID player) {
         if (!isRunner(player))
             runners.add(player);
     }
 
-    public static void removeRunner(UUID player) {
+    public void removeRunner(UUID player) {
         runners.remove(player);
     }
 
-    public static void addTagger(UUID player) {
+    public void addTagger(UUID player) {
         if (!isTagger(player))
             tagger.add(player);
     }
 
-    public static void removeTagger(UUID player) {
+    public void removeTagger(UUID player) {
         tagger.remove(player);
     }
 
-    public static List<UUID> getTaggers() {
+    public List<UUID> getTaggers() {
         return tagger;
     }
 
-    public static List<UUID> getRunners() {
+    public List<UUID> getRunners() {
         return runners;
     }
 
-    public static boolean isLiving(UUID player) {
+    public boolean isLiving(UUID player) {
         if (alive.contains(player)) {
             return true;
         }
@@ -59,23 +59,23 @@ public class TeamManager {
     }
 
 
-    public static void addLiving(UUID player) {
+    public void addLiving(UUID player) {
         if (!isLiving(player))
             alive.add(player);
     }
 
-    public static void removeLiving(UUID player) {
+    public void removeLiving(UUID player) {
         alive.remove(player);
     }
 
 
-    public static List<UUID> getLiving() {
+    public List<UUID> getLiving() {
         return alive;
     }
 
-    public static UUID selectTagger() {
+    public UUID selectTagger() {
         Random rand = new Random();
-        UUID firstTagger = TeamManager.getLiving().get(rand.nextInt(TeamManager.getLiving().size()));
+        UUID firstTagger = this.getLiving().get(rand.nextInt(this.getLiving().size()));
         return firstTagger;
     }
 }

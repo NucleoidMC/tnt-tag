@@ -8,6 +8,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -41,6 +42,7 @@ public class TNTTAGActive {
     private final TNTTAGSpawnLogic spawnLogic;
     private final TNTTAGStageManager stageManager;
     private final boolean ignoreWinState;
+    private final TeamManager teammanager;
     private long nextTime = 0;
     //private final TNTRUNTimerBar timerBar;
 
@@ -50,10 +52,27 @@ public class TNTTAGActive {
         this.gameMap = map;
         this.spawnLogic = new TNTTAGSpawnLogic(gameSpace, map);
         this.participants = new Object2ObjectOpenHashMap<>();
+        this.teammanager = new TeamManager();
 
         for (PlayerRef player : participants) {
             this.participants.put(player, new TNTTAGPlayer());
         }
+
+        for (PlayerRef ref : participants) {
+            System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
+            teammanager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
+            teammanager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
+            ref.getEntity(gameSpace.getServer()).addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
+        }
+        System.out.println(teammanager.getLiving().size());
+        UUID firstTagger = teammanager.selectTagger();
+        teammanager.removeRunner(firstTagger);
+        teammanager.addTagger(firstTagger);
+        PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
+        taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
+        taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
+        taggerEntity.inventory.insertStack(Items.TNT.getDefaultStack());
+        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
 
         this.stageManager = new TNTTAGStageManager();
         this.ignoreWinState = this.participants.size() <= 1;
@@ -67,13 +86,7 @@ public class TNTTAGActive {
                     .map(PlayerRef::of)
                     .collect(Collectors.toSet());
 
-            for (PlayerRef ref : participants) {
-                System.out.println(ref.getEntity(gameSpace.getServer()).getUuid());
-                TeamManager.addLiving(ref.getEntity(gameSpace.getServer()).getUuid());
-                TeamManager.addRunner(ref.getEntity(gameSpace.getServer()).getUuid());
-                ref.getEntity(gameSpace.getServer()).addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
-            }
-            System.out.println(TeamManager.getLiving().size());
+
             GlobalWidgets widgets = new GlobalWidgets(game);
             TNTTAGActive active = new TNTTAGActive(gameSpace, map, widgets, config, participants);
 
@@ -99,15 +112,8 @@ public class TNTTAGActive {
             game.on(PlayerDamageListener.EVENT, active::onPlayerDamage);
             game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
         });
-        UUID firstTagger = TeamManager.selectTagger();
-        TeamManager.removeRunner(firstTagger);
-        TeamManager.addTagger(firstTagger);
-        PlayerEntity taggerEntity = gameSpace.getServer().getPlayerManager().getPlayer(firstTagger);
-        taggerEntity.sendMessage(new LiteralText("You are tagger").formatted(Formatting.RED), false);
-        taggerEntity.inventory.armor.set(3, Items.TNT.getDefaultStack());
-        taggerEntity.inventory.insertStack(Items.TNT.getDefaultStack());
-        taggerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
 
+        
     }
 
     private void onOpen() {
@@ -132,9 +138,9 @@ public class TNTTAGActive {
 
     private void removePlayer(ServerPlayerEntity player) {
         spawnSpectator(player);
-        TeamManager.removeRunner(player.getUuid());
-        TeamManager.removeTagger(player.getUuid());
-        TeamManager.removeLiving(player.getUuid());
+        teammanager.removeRunner(player.getUuid());
+        teammanager.removeTagger(player.getUuid());
+        teammanager.removeLiving(player.getUuid());
     }
 
     private void setTagger(UUID player) {
@@ -143,8 +149,8 @@ public class TNTTAGActive {
         playerEnt.inventory.armor.set(3, Items.TNT.getDefaultStack());
         playerEnt.setStackInHand(playerEnt.getActiveHand(),Items.TNT.getDefaultStack());
         playerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,1, true, false, true));
-        TeamManager.removeRunner(player);
-        TeamManager.addTagger(player);
+        teammanager.removeRunner(player);
+        teammanager.addTagger(player);
     }
 
     private void setRunner(UUID player) {
@@ -154,8 +160,8 @@ public class TNTTAGActive {
         playerEnt.inventory.clear();
         playerEnt.setStackInHand(playerEnt.getActiveHand(),Items.AIR.getDefaultStack());
         playerEnt.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED,99999,0, true, false, true));
-        TeamManager.removeTagger(player);
-        TeamManager.addRunner(player);
+        teammanager.removeTagger(player);
+        teammanager.addRunner(player);
     }
 
     private ActionResult onPlayerDamage(ServerPlayerEntity player, DamageSource source, float amount) {
@@ -163,7 +169,7 @@ public class TNTTAGActive {
         if (source.getAttacker() instanceof PlayerEntity) {
             PlayerEntity attacker = (PlayerEntity) source.getAttacker();
             player.heal(amount);
-            if (TeamManager.isTagger(attacker.getUuid()) && TeamManager.isRunner(player.getUuid())) {
+            if (teammanager.isTagger(attacker.getUuid()) && teammanager.isRunner(player.getUuid())) {
                 setTagger(player.getUuid());
                 setRunner(attacker.getUuid());
             }
@@ -195,37 +201,37 @@ public class TNTTAGActive {
         ServerWorld world = this.gameSpace.getWorld();
         long time = world.getTime();
 
-        for (UUID player : TeamManager.getLiving()) {
+        for (UUID player : teammanager.getLiving()) {
             ServerPlayerEntity playerEnt = gameSpace.getServer().getPlayerManager().getPlayer(player);
             if (playerEnt != null) {
                 playerEnt.setExperienceLevel(((int) (nextTime - time) / 20));
             }
         }
 
-        if (time == nextTime && TeamManager.getLiving().size() > 1) {
-            for (UUID player : TeamManager.getTaggers()) {
+        if (time == nextTime && teammanager.getLiving().size() > 1) {
+            for (UUID player : teammanager.getTaggers()) {
                 ServerPlayerEntity tagger = gameSpace.getServer().getPlayerManager().getPlayer(player);
                 for (PlayerRef ref : this.participants.keySet()) {
-                    if (TeamManager.getRunners().contains(ref.getEntity(world).getUuid()) && ref != null) {
+                    if (teammanager.getRunners().contains(ref.getEntity(world).getUuid()) && ref != null) {
                         ref.getEntity(world).sendMessage(new LiteralText(tagger.getName().asString() + " blew up").formatted(Formatting.YELLOW), false);
                     }
                 }
                 world.createExplosion(null, tagger.getPos().getX(), tagger.getPos().getY(), tagger.getPos().getZ(), 0.0f, Explosion.DestructionType.NONE);
                 tagger.sendMessage(new LiteralText("You lost").formatted(Formatting.YELLOW), false);
                 removePlayer(tagger);
-                if (TeamManager.getLiving().size() <= 1) {
-                    for (UUID user : TeamManager.getLiving()) {
+                if (teammanager.getLiving().size() <= 1) {
+                    for (UUID user : teammanager.getLiving()) {
                         this.broadcastWin(WinResult.win(this.gameSpace.getServer().getPlayerManager().getPlayer(user)));
                         this.gameSpace.close(GameCloseReason.FINISHED);
                     }
                 } else {
-                    UUID firstTagger = TeamManager.selectTagger();
+                    UUID firstTagger = teammanager.selectTagger();
                     setTagger(firstTagger);
                 }
             }
             nextTime = time + (20 * 30);
-        } else if (TeamManager.getLiving().size() <= 1) {
-            for (UUID user : TeamManager.getLiving()) {
+        } else if (teammanager.getLiving().size() <= 1) {
+            for (UUID user : teammanager.getLiving()) {
                 this.broadcastWin(WinResult.win(this.gameSpace.getServer().getPlayerManager().getPlayer(user)));
                 this.gameSpace.close(GameCloseReason.FINISHED);
             }
