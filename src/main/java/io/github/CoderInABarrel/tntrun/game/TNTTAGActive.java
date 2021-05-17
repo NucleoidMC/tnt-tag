@@ -1,6 +1,9 @@
 package io.github.CoderInABarrel.tntrun.game;
 
+import io.github.CoderInABarrel.tntrun.TNTTAG;
 import io.github.CoderInABarrel.tntrun.game.map.TNTTAGMap;
+import io.github.CoderInABarrel.tntrun.game.powerup.PowerupManager;
+import io.github.CoderInABarrel.tntrun.game.powerup.PowerupRegistry;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.entity.damage.DamageSource;
@@ -16,6 +19,8 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.explosion.Explosion;
 import xyz.nucleoid.plasmid.game.GameCloseReason;
@@ -28,6 +33,8 @@ import xyz.nucleoid.plasmid.game.rule.RuleResult;
 import xyz.nucleoid.plasmid.util.PlayerRef;
 import xyz.nucleoid.plasmid.widget.GlobalWidgets;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,6 +51,7 @@ public class TNTTAGActive {
     private final boolean ignoreWinState;
     private final TeamManager teammanager;
     private long nextTime = 0;
+    private PowerupManager powerupManager;
     //private final TNTRUNTimerBar timerBar;
 
     private TNTTAGActive(GameSpace gameSpace, TNTTAGMap map, GlobalWidgets widgets, TNTTAGConfig config, Set<PlayerRef> participants) {
@@ -53,7 +61,9 @@ public class TNTTAGActive {
         this.spawnLogic = new TNTTAGSpawnLogic(gameSpace, map);
         this.participants = new Object2ObjectOpenHashMap<>();
         this.teammanager = new TeamManager();
-
+        LinkedList test = new LinkedList<BlockPos>();
+        test.push(map.spawn);
+        this.powerupManager = new PowerupManager(gameSpace.getServer(), gameSpace.getWorld(),test);
         for (PlayerRef player : participants) {
             this.participants.put(player, new TNTTAGPlayer());
         }
@@ -200,6 +210,7 @@ public class TNTTAGActive {
     private void tick() {
         ServerWorld world = this.gameSpace.getWorld();
         long time = world.getTime();
+        powerupManager.tick();
 
         for (UUID player : teammanager.getLiving()) {
             ServerPlayerEntity playerEnt = gameSpace.getServer().getPlayerManager().getPlayer(player);

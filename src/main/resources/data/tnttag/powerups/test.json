@@ -1,0 +1,7 @@
+{
+  "duration": 10,
+  "effect": "slowness",
+  "id": "test",
+  "block_id": "grass_block",
+  "type": "buff"
+}
