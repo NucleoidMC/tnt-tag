@@ -34,6 +34,7 @@ public class TNTTAGMapGenerator {
         }
         template.getMetadata().getRegions().forEach( region -> {
             if (region.getMarker().toLowerCase().contains("powerup")) {
+                System.out.println(region.getBounds().getCenter());
                 spawns.push(new BlockPos(region.getBounds().getCenter()));
             }
         });

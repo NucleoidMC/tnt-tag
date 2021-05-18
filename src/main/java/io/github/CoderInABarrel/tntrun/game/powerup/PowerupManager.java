@@ -1,6 +1,7 @@
 package io.github.CoderInABarrel.tntrun.game.powerup;
 
 import com.sun.tools.javac.jvm.Gen;
+import jdk.internal.module.SystemModuleFinders;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -18,6 +19,7 @@ import net.minecraft.util.math.EulerAngle;
 import xyz.nucleoid.plasmid.Plasmid;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.UUID;
 
@@ -27,33 +29,35 @@ public class PowerupManager {
     private MinecraftServer server;
     private ServerWorld world;
     private int initTick;
-    private int targetTick = initTick + (10 * 20);
+    private int targetTick;
 
     public PowerupManager(MinecraftServer server, ServerWorld world, LinkedList<BlockPos> spawnPositions) {
         this.server = server;
-        world.getEntitiesByType(EntityType.ARMOR_STAND, Entity::isOnGround).forEach(entity -> entity.kill());
         this.world = world;
         this.initTick = server.getTicks();
         this.spawnPositions = spawnPositions;
+        this.targetTick = server.getTicks() + (20 * 20);
         respawn();
     }
 
     public void tick() {
         int curTick = server.getTicks();
-        for (UUID id : powerUpEntities.keySet()) {
-            ArmorStandEntity ent = (ArmorStandEntity) world.getEntity(id);
-            // check if ent is null, then remove anyway
-            if (ent == null) {
-                powerUpEntities.remove(id);
-                continue;
-            }
+        System.out.println(targetTick - curTick);
 
-            EulerAngle curAngle = ent.getHeadRotation();
-            ent.setHeadRotation(new EulerAngle(0, 10 + curAngle.getYaw(), 0));
+        for (Iterator<UUID> iterator = powerUpEntities.keySet().iterator(); iterator.hasNext();) {
+            UUID id = iterator.next();
+            ArmorStandEntity ent = (ArmorStandEntity) world.getEntity(id);
+            // ent could be null do to them killing themselves on touched by player
+            if (ent == null) {
+                iterator.remove();
+            }else {
+                EulerAngle curAngle = ent.getHeadRotation();
+                ent.setHeadRotation(new EulerAngle(0, 10 + curAngle.getYaw(), 0));
+            }
         }
         if (curTick == targetTick) {
             respawn();
-            targetTick = curTick + (10 * 20);
+            targetTick = curTick + (20 * 20);
         }else {
             // TODO: 5/17/2021 do stuff on non spawn tick
         }
@@ -62,14 +66,10 @@ public class PowerupManager {
     // respawn all the powerups
     public void respawn() {
         // clear the remaining ones
-        for (UUID powerUpEntity : powerUpEntities.keySet()) {
-            try {
-                world.getEntity(powerUpEntity).kill();
-                powerUpEntities.remove(powerUpEntity);
-            } catch (Exception err) {
-                Plasmid.LOGGER.warn("Error clearing spawned powerup entities, may be first spawn, or is null");
-            }
-
+        for (Iterator<UUID> iterator = powerUpEntities.keySet().iterator(); iterator.hasNext();) {
+            UUID id = iterator.next();
+            world.getEntity(id).remove();
+            iterator.remove();
         }
         // respawn them
         for (BlockPos pos : spawnPositions) {
@@ -78,6 +78,7 @@ public class PowerupManager {
             PowerupEntity ent = new PowerupEntity(EntityType.ARMOR_STAND, world, powerup);
             ent.requestTeleport(pos.getX(), pos.getY() - 1, pos.getZ());
             world.spawnEntity(ent);
+            System.out.println(ent.getPos());
             ent.equipStack(EquipmentSlot.HEAD, powerup.getGeneratedBlock().asItem().getDefaultStack());
             System.out.println(powerup.getGeneratedBlock().asItem().getDefaultStack());
             ent.setInvisible(true);
