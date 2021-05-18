@@ -38,7 +38,7 @@ public class TNTTAGSpawnLogic {
     public void spawnPlayer(ServerPlayerEntity player) {
         ServerWorld world = this.gameSpace.getWorld();
 
-        BlockPos pos = this.map.spawn;
+        BlockPos pos = this.map.playerSpawn.getMax();
         if (pos == null) {
             TNTTAG.LOGGER.error("Cannot spawn player! No spawn is defined in the map!");
             return;

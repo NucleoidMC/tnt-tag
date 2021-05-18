@@ -1,7 +1,7 @@
 {
   "duration": 10,
   "effect": "slowness",
-  "id": "test",
+  "id": "slow",
   "block_id": "grass_block",
-  "type": "buff"
+  "type": "debuff"
 }

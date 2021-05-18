@@ -1,7 +1,16 @@
 package io.github.CoderInABarrel.tntrun.game.map;
 
+import org.jetbrains.annotations.NotNull;
+import xyz.nucleoid.plasmid.Plasmid;
+import xyz.nucleoid.plasmid.game.GameOpenContext;
+import xyz.nucleoid.plasmid.game.GameOpenException;
 import xyz.nucleoid.plasmid.map.template.MapTemplate;
 import net.minecraft.util.math.BlockPos;
+import xyz.nucleoid.plasmid.map.template.MapTemplateSerializer;
+import xyz.nucleoid.plasmid.map.template.TemplateRegion;
+
+import java.io.IOException;
+import java.util.LinkedList;
 
 public class TNTTAGMapGenerator {
 
@@ -11,22 +20,23 @@ public class TNTTAGMapGenerator {
         this.config = config;
     }
 
-    public TNTTAGMap build() {
-        MapTemplate template = MapTemplate.createEmpty();
-        TNTTAGMap map = new TNTTAGMap(template, this.config);
-
-        this.buildSpawn(template);
-        map.spawn = new BlockPos(0,65,0);
-
-        return map;
-    }
-
-    private void buildSpawn(MapTemplate builder) {
-        BlockPos min = new BlockPos(-50, 64, -50);
-        BlockPos max = new BlockPos(50, 64, 50);
-
-        for (BlockPos pos : BlockPos.iterate(min, max)) {
-            builder.setBlockState(pos, this.config.spawnBlock);
+    public @NotNull TNTTAGMap build() {
+        MapTemplate template = null;
+        try  {
+            template = MapTemplateSerializer.INSTANCE.loadFromResource(this.config.id);
+        } catch (GameOpenException | IOException err) {
+            Plasmid.LOGGER.error(err.getMessage());
         }
+        LinkedList<BlockPos> spawns = new LinkedList<BlockPos>();
+        TemplateRegion spawnRegion = template.getMetadata().getFirstRegion("Spawn");
+        if (spawnRegion == null) {
+            Plasmid.LOGGER.error("Spawn region for map " + this.config.id + " is null");
+        }
+        template.getMetadata().getRegions().forEach( region -> {
+            if (region.getMarker().toLowerCase().contains("powerup")) {
+                spawns.push(new BlockPos(region.getBounds().getCenter()));
+            }
+        });
+        return new TNTTAGMap(template, config, spawns, spawnRegion.getBounds());
     }
 }

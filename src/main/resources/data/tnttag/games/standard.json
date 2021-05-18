@@ -1,10 +1,7 @@
 {
   "type": "tnttag:tnttag",
   "map": {
-    "spawn_block": {
-      "Name": "minecraft:red_terracotta",
-      "Properties": {}
-    }
+    "id": "tnttag:standard"
   },
   "players": {
     "min": 2,

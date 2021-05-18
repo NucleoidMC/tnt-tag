@@ -52,6 +52,7 @@ public class TNTTAGActive {
     private final TeamManager teammanager;
     private long nextTime = 0;
     private PowerupManager powerupManager;
+    private int roundTime = 15;
     //private final TNTRUNTimerBar timerBar;
 
     private TNTTAGActive(GameSpace gameSpace, TNTTAGMap map, GlobalWidgets widgets, TNTTAGConfig config, Set<PlayerRef> participants) {
@@ -61,9 +62,7 @@ public class TNTTAGActive {
         this.spawnLogic = new TNTTAGSpawnLogic(gameSpace, map);
         this.participants = new Object2ObjectOpenHashMap<>();
         this.teammanager = new TeamManager();
-        LinkedList test = new LinkedList<BlockPos>();
-        test.push(map.spawn);
-        this.powerupManager = new PowerupManager(gameSpace.getServer(), gameSpace.getWorld(),test);
+        this.powerupManager = new PowerupManager(gameSpace.getServer(), gameSpace.getWorld(),map.powerupSpawns);
         for (PlayerRef player : participants) {
             this.participants.put(player, new TNTTAGPlayer());
         }
