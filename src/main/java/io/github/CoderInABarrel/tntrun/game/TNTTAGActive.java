@@ -10,6 +10,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.InventoryChangedListener;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -108,6 +110,7 @@ public class TNTTAGActive {
             game.setRule(GameRule.BLOCK_DROPS, RuleResult.DENY);
             game.setRule(GameRule.THROW_ITEMS, RuleResult.DENY);
             game.setRule(GameRule.UNSTABLE_TNT, RuleResult.DENY);
+            game.setRule(GameRule.CRAFTING, RuleResult.DENY);
 
             game.on(GameOpenListener.EVENT, active::onOpen);
             game.on(GameCloseListener.EVENT, active::onClose);
@@ -120,9 +123,25 @@ public class TNTTAGActive {
 
             game.on(PlayerDamageListener.EVENT, active::onPlayerDamage);
             game.on(PlayerDeathListener.EVENT, active::onPlayerDeath);
+            game.on(DropItemListener.EVENT, active::onItemDrop);
+            game.on(PlayerChatListener.EVENT, active::onChat);
         });
 
         
+    }
+
+    private ActionResult onChat(Text text, ServerPlayerEntity player) {
+        if (teammanager.isTagger(player.getUuid())) {
+            for (PlayerRef p : participants.keySet()) {
+                p.getEntity(player.getServer()).sendMessage(text.copy().formatted(Formatting.RED), false);
+            }
+            return ActionResult.FAIL;
+        }
+        return ActionResult.SUCCESS;
+    }
+
+    private ActionResult onItemDrop(PlayerEntity playerEntity, int i, ItemStack itemStack) {
+        return ActionResult.FAIL;
     }
 
     private void onOpen() {
